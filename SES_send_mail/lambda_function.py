@@ -27,7 +27,7 @@ def lambda_handler(event, context):
             'ToAddresses': [context["email"]],
         },
         Message= email_message,
-        Source='info@deepatabc.com'
+        Source='abc@abc.com'
     )
 
     print(f"ses response id received: {ses_response['MessageId']}.")
