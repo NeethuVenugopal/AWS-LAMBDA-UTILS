@@ -1,0 +1,27 @@
+import json
+
+import subprocess
+import shutil
+import boto3
+import json
+import os
+
+def lambda_handler(event, context):
+    #Parameters =============================
+    pipPackage = "numpy"
+    packageVersion = "1.24.0"
+    s3Bucket = "pip-pkgs"
+    #========================================
+    #Create standard layer directory structure (per AWS guidelines)
+    os.makedirs("/tmp/python/python/lib/python3.9/site-packages/")
+    #Pip install the package, then zip it
+    subprocess.call(f'pip3 install {pipPackage}=={packageVersion} -t /tmp/python/python/lib/python3.9/site-packages/ --no-cache-dir'.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    shutil.make_archive("/tmp/python", 'zip', "/tmp/python")
+    #Put the zip in your S3 Bucket
+    S3 = boto3.resource('s3')
+    try:
+        S3.meta.client.upload_file('/tmp/python.zip', s3Bucket, f'{pipPackage}/{packageVersion}/python.zip')
+    except Exception as exception:
+        print('Oops, Exception: ', exception)
+    
+    return {'statusCode': 200,'body': json.dumps('Success!')}
